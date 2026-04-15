@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Service — Análise Inteligente com IA</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --error: #dc2626;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      padding: 32px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .upload-area input {
+      display: none;
+    }
+
+    .upload-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .file-name {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.info {
+      background: #eff6ff;
+      color: var(--primary);
+      display: block;
+    }
+
+    .status.success {
+      background: #f0fdf4;
+      color: var(--success);
+      display: block;
+    }
+
+    .status.error {
+      background: #fef2f2;
+      color: var(--error);
+      display: block;
+    }
+
+    .result {
+      margin-top: 24px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .result-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .result-card h4 {
+      font-size: 15px;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    .result-card ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+    }
+
+    .result-card li {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .glossary-item {
+      background: #f1f5f9;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .glossary-term {
+      font-weight: 600;
+      color: var(--primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn-outline {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .loading-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+
+      0%,
+      20% {
+        content: '';
+      }
+
+      40% {
+        content: '.';
+      }
+
+      60% {
+        content: '..';
+      }
+
+      80%,
+      100% {
+        content: '...';
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>📄 PDF Service</h1>
+      <p class="subtitle">Análise inteligente de documentos com IA local (Ollama + Qwen3.5)</p>
+    </header>
+
+    <form id="pdfForm" onsubmit="handleUpload(event)">
+      <label class="upload-area" id="dropZone" for="pdfFile">
+        <div class="upload-icon">📁</div>
+        <p><strong>Clique para selecionar</strong> ou arraste um PDF aqui</p>
+        <p style="color:var(--text-muted);font-size:13px;margin-top:6px">Suporta PDFs de texto (máx. 10MB)</p>
+        <p id="fileName" class="file-name"></p>
+      </label>
+      <input type="file" id="pdfFile" name="file" accept=".pdf" required />
+      <button type="submit" id="submitBtn" class="btn">🚀 Analisar com IA</button>
+    </form>
+
+    <div id="status" class="status"></div>
+
+    <div id="result" class="result">
+      <h3>🔍 Resultado da Análise</h3>
+      <div id="structuredView"></div>
+      <div class="actions">
+        <button class="btn-outline" onclick="copyJSON()">📋 Copiar JSON</button>
+        <button class="btn-outline" onclick="downloadJSON()">💾 Baixar JSON</button>
+      </div>
+      <pre id="rawJson" style="display:none"></pre>
+    </div>
+
+    <footer>
+      <p>Backend: Flask + Gunicorn | IA: Ollama + Qwen3.5:2b | Infra: Docker + WSL2</p>
+      <p style="margin-top:4px">Projeto por <strong>Marvin Costa</strong> — <a href="https://github.com/marvincoast"
+          target="_blank" style="color:var(--primary)">github.com/marvincoast</a></p>
+    </footer>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('pdfFile');
+    const fileNameDisplay = document.getElementById('fileName');
+    const dropZone = document.getElementById('dropZone');
+    const statusDiv = document.getElementById('status');
+    const resultDiv = document.getElementById('result');
+    const structuredView = document.getElementById('structuredView');
+    const rawJsonPre = document.getElementById('rawJson');
+    const submitBtn = document.getElementById('submitBtn');
+
+    let lastResponse = null;
+
+    // Drag & drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'));
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'));
+    });
+    dropZone.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files.length && files[0].type === 'application/pdf') {
+        fileInput.files = files;
+        fileNameDisplay.textContent = `✅ ${files[0].name}`;
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) {
+        fileNameDisplay.textContent = `✅ ${fileInput.files[0].name}`;
+      }
+    });
+
+    async function handleUpload(e) {
+      e.preventDefault();
+      if (!fileInput.files[0]) return;
+
+      const file = fileInput.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        showStatus('❌ Arquivo muito grande. Máximo: 10MB', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '⏳ Processando<span class="loading-dots"></span>';
+      resultDiv.classList.remove('show');
+      showStatus('⏳ Enviando PDF e analisando com IA local...<br><small style="font-weight:400">Isso pode levar 30-60 segundos em CPU</small>', 'info');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('http://127.0.0.1:8080/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.ai_analysis) {
+          lastResponse = data;
+          renderStructured(data.ai_analysis);
+          showStatus('✅ Análise concluída com sucesso!', 'success');
+          resultDiv.classList.add('show');
+        } else {
+          showStatus(`❌ ${data.error || 'Erro ao processar PDF'}`, 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        showStatus('🌐 Erro de conexão. Verifique se:<br>• O container está rodando: <code>docker ps | grep pdf-svc</code><br>• O Ollama está ativo: <code>ollama ps</code>', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 Analisar com IA';
+      }
+    }
+
+    function renderStructured(analysis) {
+      let html = '';
+
+      if (analysis.summary) {
+        html += `<div class="result-card"><h4>📝 Resumo Executivo</h4><p>${escapeHtml(analysis.summary)}</p></div>`;
+      }
+
+      if (analysis.key_topics?.length) {
+        html += `<div class="result-card"><h4>🎯 Tópicos Principais</h4><ul>${analysis.key_topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul></div>`;
+      }
+
+      if (analysis.glossary && Object.keys(analysis.glossary).length) {
+        html += `<div class="result-card"><h4>📚 Glossário</h4><div class="glossary-grid">`;
+        for (const [term, def] of Object.entries(analysis.glossary)) {
+          html += `<div class="glossary-item"><span class="glossary-term">${escapeHtml(term)}</span>${escapeHtml(def)}</div>`;
+        }
+        html += `</div></div>`;
+      }
+
+      if (analysis.next_steps?.length) {
+        html += `<div class="result-card"><h4>🚀 Próximos Passos Sugeridos</h4><ol>${analysis.next_steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol></div>`;
+      }
+
+      // Raw JSON hidden by default
+      rawJsonPre.textContent = JSON.stringify(lastResponse, null, 2);
+
+      structuredView.innerHTML = html || '<p><em>Nenhum conteúdo estruturado retornado. Veja o JSON bruto abaixo.</em></p>';
+    }
+
+    function showStatus(message, type) {
+      statusDiv.innerHTML = message;
+      statusDiv.className = `status ${type}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    function copyJSON() {
+      if (!lastResponse) return;
+      navigator.clipboard.writeText(JSON.stringify(lastResponse, null, 2));
+      showStatus('📋 JSON copiado para a área de transferência!', 'success');
+    }
+
+    function downloadJSON() {
+      if (!lastResponse) return;
+      const blob = new Blob([JSON.stringify(lastResponse, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analise-${lastResponse.filename || 'pdf'}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+
+</html>
