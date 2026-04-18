@@ -37,10 +37,10 @@
   100% { opacity: 0; transform: perspective(1200px) rotateY(-25deg) scale(0.92); }
 }
 
-/* HUD cards entrance */
+/* HUD cards entrance (avoid translateZ — conflicts with backdrop-filter / stacking) */
 @keyframes hudIn {
-  from { opacity: 0; transform: translateZ(0) translateY(30px); }
-  to   { opacity: 1; transform: translateZ(50px) translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Progress bar */
@@ -84,4 +84,26 @@
   40%     { content: '.'; }
   60%     { content: '..'; }
   80%, 100% { content: '...'; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob,
+  .upload-icon,
+  .progress-fill,
+  .btn-submit.processing {
+    animation: none !important;
+  }
+
+  .page-enter,
+  .page-exit,
+  .hud-container {
+    animation: none !important;
+  }
+
+  .upload-zone:hover,
+  .btn-submit:hover:not(:disabled),
+  .hud-card:hover,
+  .btn-action:hover {
+    transform: none !important;
+  }
 }

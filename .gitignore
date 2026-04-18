@@ -29,8 +29,11 @@ env/
 Thumbs.db
 desktop.ini
 
-# Docker
-*.log
+# Logs da aplicação — ignorar conteúdo de logs/, mas manter logs/.gitkeep versionado
+# (não usar só `logs/**`: isso ignora o diretório e o `!` do .gitkeep deixa de funcionar)
+/*.log
+/logs/*
+!/logs/.gitkeep
 
 # Tests
 .pytest_cache/

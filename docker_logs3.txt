@@ -1,0 +1,21 @@
+[2026-04-17 03:19:12 +0000] [1] [INFO] Starting gunicorn 21.2.0
+[2026-04-17 03:19:12 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2026-04-17 03:19:12 +0000] [1] [INFO] Using worker: gthread
+[2026-04-17 03:19:12 +0000] [7] [INFO] Booting worker with pid: 7
+[2026-04-17 03:19:12 +0000] [8] [INFO] Booting worker with pid: 8
+{"timestamp":"2026-04-17 03:19:26,283","level":"INFO","service":"pdf-service","message":"📄 Extraído: 887 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:19:26,283","level":"INFO","service":"pdf-service","message":"📄 PDF: Renovação da Habilitação.pdf | 887 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:19:26,284","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Outro/Genérico (confiança: 0%)"}
+{"timestamp":"2026-04-17 03:19:26,284","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=887"}
+{"timestamp":"2026-04-17 03:19:26,305","level":"WARNING","service":"pdf-service","message":"⚠️ IA falhou (HTTPError): 404 Client Error: Not Found for url: http://127.0.0.1:11434/api/generate"}
+{"timestamp":"2026-04-17 03:19:26,305","level":"INFO","service":"pdf-service","message":"🔄 Executando fallback inteligente para tipo: other"}
+{"timestamp":"2026-04-17 03:19:26,307","level":"INFO","service":"pdf-service","message":"🎯 Fallback concluído: 9 campos extraídos"}
+{"timestamp":"2026-04-17 03:32:25,668","level":"INFO","service":"pdf-service","message":"📄 Extraído: 3586 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:32:25,670","level":"INFO","service":"pdf-service","message":"📄 PDF: Marvin_Costa_Curriculo.pdf | 3586 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:32:25,673","level":"INFO","service":"pdf-service","message":"📊 Scores: {"resume": 5, "medical_report": 1, "invoice": 1, "educational_certificate": 4, "technical_report": 1}"}
+{"timestamp":"2026-04-17 03:32:25,674","level":"INFO","service":"pdf-service","message":"🎯 Classificado: resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:32:25,674","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Currículo/Resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:32:25,675","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=3586"}
+{"timestamp":"2026-04-17 03:32:27,216","level":"WARNING","service":"pdf-service","message":"⚠️ IA falhou (HTTPError): 500 Server Error: Internal Server Error for url: http://127.0.0.1:11434/api/generate"}
+{"timestamp":"2026-04-17 03:32:27,217","level":"INFO","service":"pdf-service","message":"🔄 Executando fallback inteligente para tipo: resume"}
+{"timestamp":"2026-04-17 03:32:27,219","level":"INFO","service":"pdf-service","message":"🎯 Fallback concluído: 10 campos extraídos"}

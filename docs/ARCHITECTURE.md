@@ -22,12 +22,12 @@ Upload → Extração → Classificação → IA → Fallback → Resposta
 - 13+ keywords por tipo com score de confiança
 - Retorna `doc_type`, `label`, `confidence`, `scores`
 
-### 3. Motor Cognitivo (Ollama)
-- **Arquivo:** `backend/services/ollama_client.py`
-- Prompts adaptativos por tipo de documento
-- Pede: `detailed_summary`, `key_findings`, entidades, `recommendations`
-- Configuração: `num_ctx=4096`, `num_predict=800`, `temperature=0.1`
-- Extrai JSON da resposta (mesmo com markdown ou texto extra)
+### 3. Motor cognitivo (LLM local)
+- **Arquivo:** `backend/services/llm_client.py` — HTTP `POST /v1/chat/completions` (OpenAI-compatible)
+- Modelo recomendado: **Qwen2.5-0.5B-Instruct** (ou equivalente leve) no LM Studio / llama.cpp server
+- Prompt pede JSON com `document_purpose`, `detailed_summary`, `grouped_info`, `key_findings`, `recommendations`
+- Configuração via `LLM_MAX_TOKENS`, `LLM_TIMEOUT`, `LLM_JSON_MODE`, `temperature=0.1`
+- Extrai JSON da resposta (markdown ou texto extra é tolerado)
 
 ### 4. Fallback Inteligente
 - **Arquivo:** `backend/utils/fallback_parser.py`

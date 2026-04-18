@@ -5,10 +5,63 @@ Extrai entidades, valores e padrões do texto bruto.
 import re
 from backend.config import logger
 
+# Ano com 2 dígitos: 00–30 → 2000–2030; 31–99 → 1931–1999.
+# (Pivô 70 tratava 31–69 como 2031–2069; ex.: 45 virava 2045 em vez de 1945.)
+_TWO_DIGIT_YEAR_PIVOT = 30
+
+# Mensagem única para o usuário final (evita jargão técnico)
+NOTE_NO_LLM = (
+    "Nesta análise o modelo de IA não respondeu ou não está disponível. "
+    "Os dados abaixo foram obtidos automaticamente a partir do texto do PDF — "
+    "confira sempre com o documento original."
+)
+
+
+def _dedupe_preserve(items: list) -> list:
+    """Remove duplicatas exatas mantendo a ordem."""
+    seen = set()
+    out = []
+    for x in items:
+        if x not in seen:
+            seen.add(x)
+            out.append(x)
+    return out
+
+
+def _canonical_date_key(s: str):
+    """
+    Retorna (chave_canônica, texto_exibição) para deduplicar datas.
+    Une variantes como 31/05/25 e 31/05/2025 na mesma chave.
+    """
+    s = s.strip()
+    m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$", s)
+    if not m:
+        return None, s
+    d, mo, y = int(m.group(1)), int(m.group(2)), m.group(3)
+    yi = int(y)
+    if len(y) == 2:
+        yi = 2000 + yi if yi <= _TWO_DIGIT_YEAR_PIVOT else 1900 + yi
+    key = (d, mo, yi)
+    display = f"{d:02d}/{mo:02d}/{yi}"
+    return key, display
+
+
+def _unique_dates(date_strings: list) -> list:
+    """Datas únicas, formato DD/MM/AAAA quando possível."""
+    seen = set()
+    out = []
+    for raw in date_strings:
+        key, display = _canonical_date_key(raw)
+        dedupe_key = key if key is not None else ("raw", raw)
+        if dedupe_key not in seen:
+            seen.add(dedupe_key)
+            out.append(display)
+    return out
+
 
 def intelligent_fallback(text: str, doc_type: str) -> dict:
     """
-    Análise por regex quando Ollama falha ou não responde.
+    Análise por regex quando o LLM falha ou não responde.
     Sempre retorna dados úteis, mesmo sem IA.
     """
     logger.info(f"🔄 Executando fallback inteligente para tipo: {doc_type}")
@@ -37,6 +90,7 @@ def intelligent_fallback(text: str, doc_type: str) -> dict:
         "resume": _handle_resume,
         "educational_certificate": _handle_certificate,
         "bank_statement": _handle_bank_statement,
+        "tax_document": _handle_tax_document,
         "medical_prescription": _handle_prescription,
         "medical_report": _handle_medical_report,
         "invoice": _handle_invoice,
@@ -54,14 +108,23 @@ def intelligent_fallback(text: str, doc_type: str) -> dict:
 
 def _extract_common_entities(text: str) -> dict:
     """Extrai entidades comuns a qualquer tipo de documento."""
+    dates_raw = re.findall(r"\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}", text)
+    cnpjs_raw = re.findall(r"\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}", text)
+    money_raw = re.findall(r"R\$\s*[\d.,]+", text)
     return {
-        "emails": re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text),
-        "phones": re.findall(r'\(?\d{2}\)?[-.\s]?\d{4,5}[-.\s]?\d{4}', text),
-        "dates": re.findall(r'\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}', text),
-        "cpfs": re.findall(r'\d{3}\.\d{3}\.\d{3}-\d{2}', text),
-        "cnpjs": re.findall(r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}', text),
-        "monetary_values": re.findall(r'R\$\s*[\d.,]+', text),
-        "urls": re.findall(r'https?://[^\s<>"{}|\\^`\[\]]+', text),
+        "emails": _dedupe_preserve(
+            re.findall(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", text)
+        ),
+        "phones": _dedupe_preserve(
+            re.findall(r"\(?\d{2}\)?[-.\s]?\d{4,5}[-.\s]?\d{4}", text)
+        ),
+        "dates": _unique_dates(dates_raw),
+        "cpfs": _dedupe_preserve(re.findall(r"\d{3}\.\d{3}\.\d{3}-\d{2}", text)),
+        "cnpjs": _dedupe_preserve(cnpjs_raw),
+        "monetary_values": _dedupe_preserve(money_raw),
+        "urls": _dedupe_preserve(
+            re.findall(r'https?://[^\s<>"{}|\\^`\[\]]+', text)
+        ),
     }
 
 
@@ -96,7 +159,7 @@ def _handle_resume(text, lines, entities):
             f"{len(entities['emails'])} email(s) encontrado(s)",
             f"{len(sections)} seções do currículo identificadas"
         ],
-        "note": "Análise por fallback regex — dados extraídos por padrão"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -120,7 +183,7 @@ def _handle_certificate(text, lines, entities):
             f"Instituição: {institutions[0] if institutions else 'não identificada'}",
             f"{len(entities['dates'])} datas encontradas"
         ],
-        "note": "Certificado analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -148,7 +211,7 @@ def _handle_bank_statement(text, lines, entities):
             f"{len(entities['dates'])} datas de movimentação",
             f"Maior valor: {maior_valor}"
         ],
-        "note": "Extrato analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -165,7 +228,54 @@ def _handle_prescription(text, lines, entities):
             f"{len(meds)} medicamento(s) identificado(s)",
             f"CRM: {crm[0] if crm else 'não encontrado'}",
         ],
-        "note": "Receita analisada via fallback regex"
+        "note": NOTE_NO_LLM
+    }
+
+
+def _handle_tax_document(text, lines, entities):
+    """Extração específica para IRPF e documentos fiscais/tributários."""
+    text_lower = text.lower()
+    years = re.findall(r"(?:20\d{2})", text)
+    years = _dedupe_preserve(years)[:8]
+
+    ano_calendario = re.findall(r"ano[-\s]*calend[aá]rio[:\s-]*(20\d{2})", text, re.IGNORECASE)
+    exercicio = re.findall(r"exerc[ií]cio[:\s-]*(20\d{2})", text, re.IGNORECASE)
+    cpf = entities.get("cpfs", [])
+    valores = entities.get("monetary_values", [])
+
+    sinais = {
+        "irpf": "irpf" in text_lower or "imposto de renda" in text_lower,
+        "receita_federal": "receita federal" in text_lower,
+        "darf": "darf" in text_lower,
+        "restituicao": "restitui" in text_lower,
+    }
+
+    findings = []
+    if sinais["irpf"]:
+        findings.append("Documento com forte indicação de declaração/imposto de renda (IRPF).")
+    if ano_calendario:
+        findings.append(f"Ano-calendário identificado: {ano_calendario[0]}.")
+    if exercicio:
+        findings.append(f"Exercício identificado: {exercicio[0]}.")
+    if cpf:
+        findings.append(f"{len(cpf)} CPF(s) encontrado(s).")
+    if valores:
+        findings.append(f"{len(valores)} valor(es) monetário(s) detectado(s).")
+
+    return {
+        "document_scope": "tributario_fiscal",
+        "tax_document_type": "IRPF/Declaração Fiscal" if sinais["irpf"] else "Documento fiscal",
+        "taxpayer_cpfs": cpf,
+        "ano_calendario": ano_calendario[0] if ano_calendario else None,
+        "exercicio": exercicio[0] if exercicio else None,
+        "years_found": years,
+        "values_found": valores[:15],
+        "dates": entities["dates"],
+        "key_findings": findings or [
+            "Documento fiscal identificado por padrões textuais.",
+            f"{len(years)} ano(s) e {len(valores)} valor(es) detectados."
+        ],
+        "note": NOTE_NO_LLM,
     }
 
 
@@ -182,7 +292,7 @@ def _handle_medical_report(text, lines, entities):
             f"CRM: {crm[0] if crm else 'não encontrado'}",
             f"CIDs encontrados: {', '.join(cid) if cid else 'nenhum'}",
         ],
-        "note": "Laudo/prontuário analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -190,19 +300,48 @@ def _handle_invoice(text, lines, entities):
     """Extração para notas fiscais."""
     nf_number = re.findall(r'(?:NF|Nota\s+Fiscal)[:\s-]*(\d+)', text, re.IGNORECASE)
     chave = re.findall(r'\d{44}', text)
+    nf_display = nf_number[0] if nf_number else None
+    cnpjs = entities["cnpjs"]
+    money = entities["monetary_values"]
+
+    findings = []
+    if nf_display:
+        findings.append(f"Nota fiscal identificada: nº {nf_display}.")
+    if cnpjs:
+        shown = ", ".join(cnpjs[:3])
+        suffix = f" (+{len(cnpjs) - 3} outro(s))" if len(cnpjs) > 3 else ""
+        findings.append(f"CNPJ(s) no documento: {shown}{suffix}.")
+    else:
+        findings.append("Nenhum CNPJ no formato XX.XXX.XXX/XXXX-XX encontrado no texto.")
+    if money:
+        shown_m = ", ".join(money[:5])
+        suffix_m = f" (+{len(money) - 5} outro(s))" if len(money) > 5 else ""
+        findings.append(f"Valores em R$: {shown_m}{suffix_m}.")
+    else:
+        findings.append("Nenhum valor em R$ no formato esperado foi encontrado.")
+
+    preview = " | ".join([l for l in lines[:6] if len(l.strip()) > 8][:3])
+    summary_parts = ["Este PDF foi classificado como nota fiscal ou documento fiscal semelhante."]
+    if nf_display:
+        summary_parts.append(f"Número da NF: {nf_display}.")
+    if cnpjs:
+        summary_parts.append(f"{len(cnpjs)} CNPJ identificado(s) no texto.")
+    if money:
+        summary_parts.append(f"{len(money)} ocorrência(s) de valores em reais.")
+    if preview:
+        summary_parts.append(f"Trecho inicial: {preview}")
+    friendly_summary = " ".join(summary_parts)
 
     return {
         "invoice_number": nf_number[0] if nf_number else "Não encontrado",
         "access_key": chave[0] if chave else "Não encontrada",
-        "cnpjs": entities["cnpjs"],
-        "values": entities["monetary_values"][:10],
+        "cnpjs": cnpjs,
+        "values": money[:10],
+        "values_found": money[:10],
         "dates": entities["dates"],
-        "key_findings": [
-            f"NF nº: {nf_number[0] if nf_number else 'não encontrado'}",
-            f"{len(entities['cnpjs'])} CNPJ(s) encontrado(s)",
-            f"{len(entities['monetary_values'])} valor(es) monetário(s)",
-        ],
-        "note": "Nota fiscal analisada via fallback regex"
+        "key_findings": findings,
+        "detailed_summary": friendly_summary,
+        "note": NOTE_NO_LLM,
     }
 
 
@@ -219,7 +358,7 @@ def _handle_contract(text, lines, entities):
             f"{len(clauses)} cláusulas identificadas",
             f"{len(entities['cpfs'])} CPF(s) e {len(entities['cnpjs'])} CNPJ(s)",
         ],
-        "note": "Contrato analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -236,7 +375,7 @@ def _handle_legal(text, lines, entities):
             f"Processo: {processo[0] if processo else 'não encontrado'}",
             f"{len(oab)} advogado(s) identificado(s)",
         ],
-        "note": "Documento jurídico analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -257,7 +396,7 @@ def _handle_technical(text, lines, entities):
             f"{len(sections)} seções do relatório identificadas",
             f"{len(text.split())} palavras no documento",
         ],
-        "note": "Relatório técnico analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }
 
 
@@ -272,5 +411,5 @@ def _handle_generic(text, lines, entities):
             f"{len(entities['emails'])} email(s), {len(entities['phones'])} telefone(s)",
             f"{len(entities['monetary_values'])} valor(es) monetário(s)",
         ],
-        "note": "Documento genérico analisado via fallback regex"
+        "note": NOTE_NO_LLM
     }

@@ -13,9 +13,17 @@ Health check do serviço.
 {
   "status": "healthy",
   "service": "pdf-service",
-  "version": "4.0-modular"
+  "version": "6.0-local-llm"
 }
 ```
+
+---
+
+## `GET /health/llm`
+
+Verifica conectividade com o servidor OpenAI-compatible (`LLM_API_BASE`) via `GET …/models` (rápido, sem inferência).
+
+**Response** `200 OK` (sempre): corpo JSON com `reachable`, `probe_url`, `configured_model` e, quando aplicável, `configured_model_listed`, `http_status` ou `error`.
 
 ---
 

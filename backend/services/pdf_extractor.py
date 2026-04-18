@@ -28,6 +28,9 @@ def extract_text(pdf_bytes: bytes) -> dict:
 
     raw_text = "\n".join([p["text"] for p in pages])
     num_pages = len(doc)
+    non_empty_pages = sum(1 for p in pages if (p.get("char_count") or 0) > 20)
+    avg_chars_per_page = int(len(raw_text) / max(num_pages, 1))
+    low_text_density = avg_chars_per_page < 120 and non_empty_pages <= max(1, int(num_pages * 0.35))
 
     # Metadados do PDF (título, autor, etc.)
     meta = doc.metadata or {}
@@ -50,5 +53,10 @@ def extract_text(pdf_bytes: bytes) -> dict:
         "raw_text": raw_text,
         "num_pages": num_pages,
         "pages": pages,
-        "pdf_metadata": pdf_metadata
+        "pdf_metadata": pdf_metadata,
+        "extraction_quality": {
+            "avg_chars_per_page": avg_chars_per_page,
+            "non_empty_pages": non_empty_pages,
+            "low_text_density": low_text_density,
+        },
     }

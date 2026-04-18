@@ -1,223 +1,198 @@
-# 📄 PDF AI Service
+# PDF AI Service
 
-> Motor de análise inteligente de documentos PDF com IA local — classificação automática, extração de entidades e resumos detalhados.
+Motor de análise de PDFs com **classificação automática**, **extração de texto (PyMuPDF)** e **LLM local leve** (recomendado: **Qwen 2.5 0.5B**) via **API compatível com OpenAI**. O padrão do projeto é **Ollama em Docker**. O resultado detalhado é exibido na página **Relatório** do frontend.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.0-green?logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-purple)
+![LLM](https://img.shields.io/badge/LLM-OpenAI--compatible%20local-purple)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
-## 🎯 O que é?
+## O que faz?
 
-PDF AI Service é uma aplicação que **analisa documentos PDF automaticamente** usando IA local (Ollama). O sistema:
-
-1. **Extrai** texto do PDF via PyMuPDF
-2. **Classifica** o tipo de documento (currículo, nota fiscal, contrato, etc.)
-3. **Analisa** via LLM local com prompts adaptativos por tipo
-4. **Retorna** JSON estruturado com resumo, entidades e recomendações
-
-**Zero dados na nuvem** — todo processamento é local.
+1. Recebe o PDF em `POST /analyze`
+2. Extrai texto e metadados com **PyMuPDF**
+3. Classifica o tipo (currículo, NF, contrato, etc.) por heurística
+4. Envia o texto ao **servidor LLM local** (chat completions) com prompt que pede **JSON** (propósito, resumo, `grouped_info`, achados, recomendações)
+5. Mescla com **fallback** baseado em regex quando a IA não responde ou o JSON não fecha
+6. O front grava a resposta em `sessionStorage` e abre **`analise.html`** com o relatório rico (accordions por categoria, achados, recomendações)
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura (resumo)
 
 ```
-📄 PDF Upload
-    ↓ POST /analyze
-📥 PyMuPDF (Extração de texto + metadados)
-    ↓
-🎯 Classificador (Keyword scoring → 10 tipos)
-    ↓
-🧠 Ollama LLM (Prompt adaptativo → análise semântica)
-    ↓
-🔄 Fallback Regex (complementa ou substitui IA)
-    ↓
-📤 JSON Estruturado (resumo + entidades + recomendações)
+PDF → POST /analyze → PyMuPDF → Classificador → LLM local (HTTP /v1/chat/completions) → merge fallback → JSON
+                                                                                              ↓
+                                                                              index.html → sessionStorage → analise.html
 ```
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack
 
-| Componente | Tecnologia | Função |
-|---|---|---|
-| **Backend** | Python 3.11 + Flask | API REST com Blueprint e App Factory |
-| **IA Local** | Ollama + Phi-3 / Qwen 3.5 | Inferência LLM sem cloud |
-| **Extração PDF** | PyMuPDF (fitz) | Texto bruto + metadados |
-| **Servidor** | Gunicorn | 2 workers + 2 threads |
-| **Container** | Docker + Compose | Build e deploy isolados |
-| **Frontend** | HTML5 + CSS3 + Vanilla JS | Interface glassmorphism com 3D parallax |
+| Camada | Tecnologia |
+|--------|------------|
+| API | Python 3.11, Flask, Gunicorn |
+| PDF | PyMuPDF (fitz) |
+| IA | Modelo local via **OpenAI-compatible** (`LLM_API_BASE` + `LLM_MODEL`) — padrão: Ollama + `qwen2.5:0.5b` |
+| Front | HTML/CSS/JS (páginas `index.html`, `analise.html`, …) |
+| Deploy | Docker Compose |
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do repositório
 
 ```
 pdf-service/
 ├── backend/
-│   ├── __init__.py              # App Factory (Flask)
-│   ├── config.py                # Configurações centralizadas
-│   ├── routes/
-│   │   └── analyze.py           # Rotas /health e /analyze
-│   ├── services/
-│   │   ├── pdf_extractor.py     # PyMuPDF — extração de texto
-│   │   ├── classifier.py        # Classificação por keywords
-│   │   └── ollama_client.py     # Comunicação com Ollama LLM
-│   └── utils/
-│       └── fallback_parser.py   # Fallback regex inteligente
-│
+│   ├── config.py
+│   ├── routes/analyze.py
+│   └── services/
+│       ├── pdf_extractor.py
+│       ├── classifier.py
+│       ├── llm_client.py       # cliente HTTP OpenAI-compatible
+│       └── llm_normalize.py
 ├── frontend/
-│   ├── index.html               # Página principal
-│   ├── arquitetura.html         # Diagrama de arquitetura
-│   ├── stacks.html              # Stacks tecnológicas
-│   └── assets/
-│       ├── css/
-│       │   ├── main.css         # Design system
-│       │   ├── animations.css   # Animações
-│       │   └── components.css   # Componentes
-│       └── js/
-│           └── app.js           # Lógica principal
-│
-├── tests/
-│   └── test_app.py              # Testes da API
-├── docs/
-│   ├── ARCHITECTURE.md          # Documentação técnica
-│   ├── API.md                   # Documentação da API
-│   └── DEPLOYMENT.md            # Guia de deploy
-│
-├── app.py                       # Entry point
-├── Dockerfile                   # Build da imagem
-├── docker-compose.yml           # Orquestração
-├── requirements.txt             # Dependências
-├── requirements-dev.txt         # Deps de desenvolvimento
-├── Makefile                     # Comandos úteis
-├── .env.example                 # Template de variáveis
-└── .gitignore
+│   ├── index.html              # upload
+│   ├── analise.html            # relatório pós-análise
+│   ├── arquitetura.html
+│   ├── stacks.html
+│   └── assets/ (css, js)
+├── logs/                     # logs da app (Git: só `.gitkeep`; resto ignorado via `/logs/*` + `!/logs/.gitkeep`)
+├── app.py
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+└── requirements.txt
 ```
 
 ---
 
-## 🚀 Setup Rápido
+## Pré-requisitos
 
-### Pré-requisitos
-- Python 3.11+
-- [Ollama](https://ollama.ai) instalado e rodando
-- Um modelo LLM baixado: `ollama pull phi3:mini`
+- Python 3.11+ **ou** Docker
+- Um **servidor local** com API **POST** `{LLM_API_BASE}/chat/completions` no formato OpenAI, carregando um modelo **Qwen** pequeno (ex.: **Qwen2.5-0.5B-Instruct**).
 
-### Instalação Local
+### Exemplo recomendado: Ollama
+
+1. Instale [Ollama](https://ollama.com/).
+2. Faça pull do modelo leve: `ollama pull qwen2.5:0.5b`.
+3. A API local fica em `http://127.0.0.1:11434/v1` com `LLM_MODEL=qwen2.5:0.5b`.
+
+### Exemplo alternativo: LM Studio
+
+1. Instale [LM Studio](https://lmstudio.ai), baixe um Qwen leve (GGUF).
+2. Carregue o modelo e inicie o servidor local na porta **1234**.
+3. Base da API: `http://127.0.0.1:1234/v1`.
+
+### Exemplo: llama.cpp server
+
+Suba o binário `llama-server` com o GGUF do Qwen e use a URL `/v1` indicada na documentação do projeto (tipicamente `http://127.0.0.1:8080/v1`).
+
+---
+
+## Configuração (.env)
+
+Copie `.env.example` para `.env` e ajuste:
+
+| Variável | Descrição |
+|----------|-----------|
+| `LLM_API_BASE` | URL base com `/v1` (ex.: `http://127.0.0.1:11434/v1`) |
+| `LLM_MODEL` | Nome do modelo no servidor |
+| `LLM_API_KEY` | Opcional (Bearer) |
+| `LLM_TIMEOUT` | Timeout de leitura da resposta HTTP (s) |
+| `LLM_CONNECT_TIMEOUT` | Timeout de conexão TCP ao host do LLM (s) |
+| `LLM_MAX_TOKENS` | Limite de tokens na resposta |
+| `LLM_JSON_MODE` | `1` tenta `response_format: json_object`; `0` desliga se o host não suportar |
+| `MAX_TEXT_CHARS`, `LLM_CHUNK_*` | Controle de tamanho e pipeline multi-trecho |
+| `LOG_DIR` | Pasta dos ficheiros de log (predef.: `logs/` no repo). **Relativo = sempre à raiz do projeto** (não ao `cwd`). Se for `.` ou a própria raiz do repo, usa-se `logs/` para não criar `.log` na raiz |
+| `LOG_TO_FILE` | `1` grava em ficheiro com rotação + consola; `0` só consola |
+| `LOG_FILE_NAME`, `LOG_FILE_MAX_BYTES`, `LOG_FILE_BACKUP_COUNT` | Nome do ficheiro em `LOG_DIR` (só **basename**; `../` é descartado), rotação |
+
+**Docker:** em `docker-compose.yml` o padrão é `LLM_API_BASE=http://ollama:11434/v1`, com serviço Ollama interno e pull automático do modelo. Os logs são gravados em **`./logs`** no host (volume montado em `/app/logs`).
+
+---
+
+## Rodar localmente
 
 ```bash
-# Clone o repositório
-git clone https://github.com/marvincoast/pdf-service.git
-cd pdf-service
-
-# Instale as dependências
 pip install -r requirements.txt
-
-# Configure as variáveis (opcional)
 cp .env.example .env
-
-# Inicie o servidor
+# suba o LM Studio (ou outro) com o modelo Qwen antes de:
 python app.py
 ```
 
-### Com Docker
+Abra `http://localhost:8080` — faça upload na **Início**; ao terminar, o fluxo redireciona para **Relatório**.
+
+---
+
+## Docker
 
 ```bash
-# Build e run
-docker-compose up -d --build
+docker compose up -d --build
+```
 
-# Ou manualmente
-docker build -t pdf-service .
-docker run -p 8080:8080 pdf-service
+Este comando sobe:
+- `pdf-service`
+- `ollama`
+- `ollama-pull` (faz `ollama pull qwen2.5:0.5b` na primeira inicialização)
+
+Observação: a porta do Ollama **não é publicada no host** por padrão para evitar conflito (ex.: `11434` já ocupada). O `pdf-service` comunica com ele pela rede interna Docker em `http://ollama:11434/v1`.
+
+Verificações rápidas:
+
+```bash
+curl http://localhost:8080/health
+curl http://localhost:8080/health/llm
+```
+
+Se `reachable=false` no `/health/llm`, confirme se o modelo foi baixado:
+
+```bash
+docker compose logs ollama-pull
+docker compose exec ollama ollama list
 ```
 
 ---
 
-## 📡 API
+## API
 
 ### `GET /health`
-```json
-{"status": "healthy", "service": "pdf-service", "version": "4.0-modular"}
-```
+
+Retorna `status`, `service`, `version`.
+
+### `GET /health/llm`
+
+Testa `GET {LLM_API_BASE}/models` (rápido). Resposta JSON com `reachable`, `configured_model`, `probe_url`, etc. A UI usa isto para avisar se o LLM está inacessível.
 
 ### `POST /analyze`
-Upload de PDF via multipart form-data.
 
-**Request:**
-```bash
-curl -X POST http://localhost:8080/analyze \
-  -F "file=@meu_documento.pdf"
-```
+`multipart/form-data` com campo `file` (PDF).
 
-**Response:**
-```json
-{
-  "filename": "curriculo.pdf",
-  "document_type": "resume",
-  "document_type_label": "Currículo/Resume",
-  "confidence": 85,
-  "pages": 2,
-  "text_length": 3200,
-  "processing_time_sec": 12.5,
-  "analysis_method": "ai",
-  "extracted_data": {
-    "detailed_summary": "Profissional com 5 anos de experiência em...",
-    "personal_info": {"name": "João Silva", "email": "joao@email.com"},
-    "skills": ["Python", "Docker", "AWS"],
-    "key_findings": ["5 anos de experiência", "Certificação AWS"],
-    "recommendations": ["Adicionar portfolio", "Incluir métricas"]
-  }
-}
-```
+Resposta inclui `analysis_method` (`ai` ou `fallback_intelligent`), `extracted_data`, `llm_coverage` (estratégia, provedor, erros resumidos).
+
+**Só cai em fallback:** runtime de IA parado, modelo não baixado, URL errada, ou `LLM_MODEL` diferente do id em `/models`. Corrija e reenvie o PDF.
+
+Notas de qualidade da análise:
+- O backend tenta preencher `document_purpose` com uma chamada complementar de IA quando esse campo vier vazio.
+- A classificação foi reforçada para documentos tributários/fiscais (ex.: IRPF, declaração de ajuste anual, DARF), reduzindo confusão com extrato bancário.
 
 ---
 
-## 📋 Tipos de Documentos Suportados
-
-| Tipo | Label | Keywords Detectadas |
-|---|---|---|
-| `resume` | Currículo/Resume | experiência, formação, habilidades |
-| `medical_prescription` | Receita Médica | medicamento, dosagem, CRM |
-| `medical_report` | Prontuário/Laudo | diagnóstico, exame, anamnese |
-| `bank_statement` | Extrato Bancário | saldo, débito, crédito, PIX |
-| `invoice` | Nota Fiscal | CNPJ, NF-e, valor total |
-| `educational_certificate` | Certificado/Diploma | universidade, carga horária |
-| `contract` | Contrato | cláusula, vigência, foro |
-| `legal_document` | Documento Jurídico | processo, OAB, sentença |
-| `technical_report` | Relatório Técnico | metodologia, resultados |
-| `other` | Genérico | fallback automático |
-
----
-
-## 🧪 Testes
+## Testes
 
 ```bash
-# Instale deps de dev
 pip install -r requirements-dev.txt
-
-# Execute os testes
 pytest tests/ -v
-
-# Lint
-flake8 backend/ app.py --max-line-length=120
 ```
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 
-**Marvin Costa** — SRE / Cloud Engineer
+**Marvin Costa** — [LinkedIn](https://linkedin.com/in/marvincost) · [GitHub](https://github.com/marvincoast)
 
-- [LinkedIn](https://linkedin.com/in/marvincost)
-- [GitHub](https://github.com/marvincoast)
-
----
-
-## 📄 Licença
-
-MIT License — use livremente.
+Licença: **MIT**.

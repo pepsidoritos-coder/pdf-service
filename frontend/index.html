@@ -4,23 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF AI — Análise Inteligente de Documentos | Marvin Costa</title>
-  <meta name="description" content="Motor de análise inteligente de PDFs com IA local. Classifica, extrai e resume currículos, notas fiscais, contratos e mais.">
+  <title>PDF AI — Análise inteligente de documentos | Marvin Costa</title>
+  <meta name="description" content="Extração e análise de PDFs com classificação automática e modelo de linguagem local (Qwen) via API compatível com OpenAI.">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/animations.css">
-  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=12">
+  <link rel="stylesheet" href="assets/css/animations.css?v=12">
+  <link rel="stylesheet" href="assets/css/components.css?v=12">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
 </head>
 
 <body>
-  <!-- Aurora Background -->
   <div class="aurora-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -28,87 +25,65 @@
   </div>
   <div class="grid-overlay"></div>
 
-  <!-- Navigation -->
-  <nav class="navbar">
+  <nav class="navbar navbar-pro">
     <a href="index.html" class="nav-brand">
       <div class="nav-logo">PDF</div>
       <div class="nav-title">PDF AI <span>Marvin Costa</span></div>
     </a>
     <div class="nav-links">
+      <a href="index.html" class="nav-link nav-link-active">Início</a>
+      <a href="analise.html" class="nav-link">Relatório</a>
       <a href="arquitetura.html" class="nav-link">Arquitetura</a>
-      <a href="stacks.html" class="nav-link stacks">Stacks Técnicas <span class="link-arrow">→</span></a>
+      <a href="stacks.html" class="nav-link stacks">Stacks <span class="link-arrow">→</span></a>
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="main-wrapper">
     <div class="glass-panel" id="mainCard">
       <header>
-        <h1>Análise Inteligente de Documentos</h1>
-        <div class="subtitle">Motor Cognitivo com PyMuPDF + Ollama (Qwen / Phi-3)</div>
+        <h1>Análise inteligente de PDF</h1>
+        <div class="subtitle">PyMuPDF + classificador heurístico + LLM local leve (Qwen) em servidor compatível com OpenAI (LM Studio / llama.cpp)</div>
       </header>
 
       <div id="statusMsg" class="status-msg"></div>
+      <div id="llmStatusBanner" class="llm-status-banner" hidden></div>
 
-      <!-- Upload Form -->
       <form id="pdfForm">
         <label class="upload-zone" id="dropZone" for="pdfFile">
           <div class="upload-icon">📄</div>
-          <div class="upload-text">Arraste seu PDF ou clique para selecionar</div>
-          <div class="upload-hint" id="fileLabel">Suporta: Currículos, Notas Fiscais, Extratos, Certificados, Contratos, Laudos...</div>
+          <div class="upload-text">Arraste o PDF ou selecione um arquivo</div>
+          <div class="upload-hint" id="fileLabel">Currículos, notas fiscais, extratos, contratos, laudos e outros documentos</div>
         </label>
         <input type="file" id="pdfFile" name="file" accept=".pdf" required>
-        <button type="submit" id="submitBtn" class="btn-submit">🚀 Iniciar Análise</button>
+        <button type="submit" id="submitBtn" class="btn-submit">Iniciar análise</button>
       </form>
 
-      <!-- Progress Bar -->
       <div id="progressContainer" class="progress-container">
         <div class="progress-bar">
           <div id="progressFill" class="progress-fill"></div>
         </div>
-        <div id="progressLabel" class="progress-label">Iniciando...</div>
+        <div id="progressLabel" class="progress-label">Iniciando…</div>
       </div>
 
-      <!-- Results HUD -->
-      <div id="resultsArea" class="hud-container">
-        <!-- Header -->
-        <div class="hud-header">
-          <div class="hud-meta">
-            <div id="docBadge" class="doc-badge">DOCUMENTO</div>
-            <div id="methodBadge" class="method-badge ai">🤖 IA</div>
-          </div>
-          <div id="hudStats" class="hud-stats"></div>
-        </div>
-
-        <!-- Summary -->
-        <div class="summary-card">
-          <span class="hud-label">📝 Resumo da Análise</span>
-          <p id="summaryText" class="summary-text">Carregando...</p>
-        </div>
-
-        <!-- Data Grid -->
-        <div id="hudGrid" class="hud-grid"></div>
-
-        <!-- Actions -->
-        <div class="actions-bar">
-          <button class="btn-action primary" onclick="copyJSON()">📋 Copiar JSON</button>
-          <button class="btn-action" onclick="downloadJSON()">💾 Exportar JSON</button>
-          <button class="btn-action" onclick="newAnalysis()">🔄 Nova Análise</button>
-        </div>
+      <div id="lastProfileCard" class="home-profile-card" hidden>
+        <span class="home-profile-title">Última classificação inteligente</span>
+        <div id="lastProfileChips" class="home-profile-chips"></div>
+        <p id="lastProfileNote" class="home-profile-note"></p>
       </div>
 
-      <!-- Footer -->
+      <p class="home-hint">Ao concluir, você será levado ao <strong>Relatório</strong>, com resumo, propósito, dados agrupados e achados. Configure o modelo em <code>LLM_API_BASE</code> e <code>LLM_MODEL</code> (veja README).</p>
+
       <footer class="site-footer">
         <div class="footer-links">
-          <a href="https://linkedin.com/in/marvincost" target="_blank" class="footer-link">💼 LinkedIn</a>
-          <a href="https://github.com/marvincoast" target="_blank" class="footer-link">🐙 GitHub</a>
+          <a href="https://linkedin.com/in/marvincost" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+          <a href="https://github.com/marvincoast" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
         </div>
-        <div class="copyright">Desenvolvido por Marvin Costa • 2026</div>
+        <div class="copyright">Marvin Costa · 2026</div>
       </footer>
     </div>
   </div>
 
-  <script src="assets/js/app.js?v=4"></script>
+  <script src="assets/js/app.js?v=12"></script>
 </body>
 
 </html>

@@ -1,0 +1,14 @@
+[2026-04-17 03:10:19 +0000] [1] [INFO] Starting gunicorn 21.2.0
+[2026-04-17 03:10:19 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2026-04-17 03:10:19 +0000] [1] [INFO] Using worker: gthread
+[2026-04-17 03:10:19 +0000] [7] [INFO] Booting worker with pid: 7
+[2026-04-17 03:10:19 +0000] [8] [INFO] Booting worker with pid: 8
+{"timestamp":"2026-04-17 03:10:27,244","level":"INFO","service":"pdf-service","message":"📄 Extraído: 4458 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:10:27,244","level":"INFO","service":"pdf-service","message":"📄 PDF: MARVIN COSTA.pdf | 4458 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:10:27,246","level":"INFO","service":"pdf-service","message":"📊 Scores: {"resume": 5, "medical_report": 1, "invoice": 1, "educational_certificate": 4, "technical_report": 1}"}
+{"timestamp":"2026-04-17 03:10:27,246","level":"INFO","service":"pdf-service","message":"🎯 Classificado: resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:10:27,246","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Currículo/Resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:10:27,246","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=4458"}
+{"timestamp":"2026-04-17 03:10:27,492","level":"WARNING","service":"pdf-service","message":"⚠️ IA falhou (ConnectionError): HTTPConnectionPool(host='host.docker.internal', port=11434): Max retries exceeded with url: /api/gen"}
+{"timestamp":"2026-04-17 03:10:27,492","level":"INFO","service":"pdf-service","message":"🔄 Executando fallback inteligente para tipo: resume"}
+{"timestamp":"2026-04-17 03:10:27,496","level":"INFO","service":"pdf-service","message":"🎯 Fallback concluído: 10 campos extraídos"}

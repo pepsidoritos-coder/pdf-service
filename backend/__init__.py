@@ -2,9 +2,12 @@
 PDF Service — Backend Flask Application Factory
 """
 import os
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from backend.config import MAX_FILE_SIZE
+
+load_dotenv()
 
 # Pasta do frontend (relativa à raiz do projeto)
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")

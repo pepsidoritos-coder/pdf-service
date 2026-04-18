@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório de análise — PDF AI | Marvin Costa</title>
+  <meta name="description" content="Relatório detalhado da análise de PDF com IA local: propósito, resumo, dados agrupados e achados.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css?v=12">
+  <link rel="stylesheet" href="assets/css/animations.css?v=12">
+  <link rel="stylesheet" href="assets/css/components.css?v=12">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+</head>
+
+<body>
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <nav class="navbar navbar-pro">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo">PDF</div>
+      <div class="nav-title">PDF AI <span>Marvin Costa</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Início</a>
+      <a href="analise.html" class="nav-link nav-link-active">Relatório</a>
+      <a href="arquitetura.html" class="nav-link">Arquitetura</a>
+      <a href="stacks.html" class="nav-link stacks">Stacks <span class="link-arrow">→</span></a>
+    </div>
+  </nav>
+
+  <div class="main-wrapper report-wrapper">
+    <div id="reportEmpty" class="glass-panel report-empty" style="display:none">
+      <h1>Relatório de análise</h1>
+      <p class="subtitle">Nenhuma análise encontrada. Envie um PDF na página inicial para gerar o relatório aqui.</p>
+      <a href="index.html" class="btn-submit btn-inline">Ir para upload</a>
+    </div>
+
+    <div id="reportContent" class="report-shell" style="display:none">
+      <div id="reportLlmHint" class="glass-panel report-llm-hint" style="display:none" role="status"></div>
+      <div id="reportLlmLive" class="glass-panel report-llm-live" style="display:none" role="status"></div>
+
+      <header class="report-hero glass-panel">
+        <div class="report-hero-top">
+          <span class="report-kicker">Relatório inteligente</span>
+          <h1 id="reportTitle">Documento</h1>
+          <p id="reportSubtitle" class="subtitle"></p>
+          <div id="reportBadges" class="report-badges"></div>
+          <div id="reportProfile" class="report-profile"></div>
+        </div>
+        <p id="reportMeta" class="report-meta mono"></p>
+      </header>
+
+      <section class="glass-panel report-section">
+        <h2 class="report-h2">Propósito do documento</h2>
+        <div id="reportPurpose" class="report-body"></div>
+      </section>
+
+      <section class="glass-panel report-section">
+        <h2 class="report-h2">Resumo analítico</h2>
+        <div id="reportSummary" class="report-body report-prose"></div>
+      </section>
+
+      <section class="glass-panel report-section">
+        <h2 class="report-h2">Informações agrupadas</h2>
+        <p class="report-lead">Campos organizados por categoria, conforme extraído do PDF.</p>
+        <div id="reportGrouped" class="report-grouped"></div>
+      </section>
+
+      <div class="report-two-col">
+        <section class="glass-panel report-section">
+          <h2 class="report-h2">Achados principais</h2>
+          <div id="reportFindings" class="report-body"></div>
+        </section>
+        <section class="glass-panel report-section">
+          <h2 class="report-h2">Recomendações</h2>
+          <div id="reportRecs" class="report-body"></div>
+        </section>
+      </div>
+
+      <section class="glass-panel report-section">
+        <h2 class="report-h2">Dados complementares</h2>
+        <div id="reportExtra" class="report-body"></div>
+      </section>
+
+      <div class="actions-bar report-actions">
+        <button type="button" class="btn-action primary" onclick="copyJSON(event)">Copiar JSON</button>
+        <button type="button" class="btn-action" onclick="downloadJSON()">Exportar JSON</button>
+        <a href="index.html" class="btn-action">Nova análise</a>
+      </div>
+
+      <footer class="site-footer">
+        <div class="footer-links">
+          <a href="https://linkedin.com/in/marvincost" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+          <a href="https://github.com/marvincoast" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
+        </div>
+        <div class="copyright">Marvin Costa · 2026</div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="assets/js/analysis-report.js?v=13"></script>
+</body>
+
+</html>

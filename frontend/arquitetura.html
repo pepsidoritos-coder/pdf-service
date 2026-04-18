@@ -1,119 +1,386 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arquitetura — PDF AI | Marvin Costa</title>
-  <meta name="description" content="Diagrama de arquitetura do PDF AI: fluxo de processamento desde upload até análise com IA local.">
+  <title>Arquitetura 3D — PDF AI | Marvin Costa</title>
+  <meta name="description" content="Diagrama arquitetural 3D em Three.js com fluxo animado do PDF por todos os componentes do sistema.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=12">
+  <link rel="stylesheet" href="assets/css/animations.css?v=12">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
   <style>
-    .container { max-width: 1200px; margin: 120px auto 60px; padding: 0 24px; }
-
-    .diagram-container {
-      background: rgba(0,0,0,0.3); border-radius: 14px; padding: 40px;
-      margin: 32px 0; border: 1px solid var(--glass-border);
-    }
-
-    .flow-diagram { display: flex; flex-direction: column; gap: 20px; align-items: center; }
-    .flow-row { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; }
-
-    .flow-node {
-      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
-      border: 1px solid rgba(99,102,241,0.3); border-radius: 12px;
-      padding: 20px 28px; text-align: center; min-width: 180px;
-      transition: all 0.3s; cursor: default;
-    }
-    .flow-node:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); }
-    .flow-node.ingest { border-color: rgba(34,211,238,0.3); background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(52,211,153,0.15)); }
-    .flow-node.cognitive { border-color: rgba(139,92,246,0.4); background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(167,139,250,0.15)); }
-    .flow-node.output { border-color: rgba(244,114,182,0.3); background: linear-gradient(135deg, rgba(244,114,182,0.15), rgba(251,191,36,0.15)); }
-
-    .node-icon { font-size: 32px; margin-bottom: 8px; }
-    .node-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-    .node-desc { font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono); }
-    .flow-arrow { color: var(--text-secondary); font-size: 24px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 0.4 } 50% { opacity: 1 } }
-    .flow-label { font-size: 0.7rem; color: var(--text-muted); text-align: center; font-family: var(--font-mono); }
-
-    .sections {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 24px; margin-top: 40px;
-    }
-
-    .section-card {
-      background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-      border-radius: 14px; padding: 28px;
-    }
-    .section-card h3 { font-size: 1.2rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-    .section-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 12px; }
-    .section-card ul { list-style: none; padding-left: 0; }
-    .section-card li { padding: 6px 0 6px 20px; position: relative; font-size: 0.85rem; color: var(--text-secondary); }
-    .section-card li::before { content: '→'; position: absolute; left: 0; color: var(--accent-cyan); }
-    .highlight { color: var(--accent-glow); font-weight: 600; }
-
-    @media(max-width:768px) { .sections { grid-template-columns: 1fr; } .flow-node { min-width: 140px; padding: 16px 20px; } }
+    .container{max-width:1360px;margin:92px auto 40px;padding:0 18px}
+    .arch-intro{margin-bottom:16px;padding:18px 20px;border:1px solid var(--glass-border);border-radius:14px;background:rgba(0,0,0,.22)}
+    .arch-intro h2{margin:0 0 8px;font-size:1.06rem;color:var(--accent-cyan)}
+    .arch-intro p{margin:0;color:var(--text-secondary);line-height:1.55;font-size:.9rem}
+    .arch-layout{display:grid;grid-template-columns:1.8fr 1fr;gap:16px}
+    .arch-scene-wrap{position:relative;min-height:760px;border:1px solid var(--glass-border);border-radius:18px;background:radial-gradient(circle at 20% 16%,rgba(99,102,241,.24),rgba(3,3,8,.7) 45%);overflow:hidden;box-shadow:var(--shadow-card)}
+    #archScene{width:100%;height:100%;min-height:760px;display:block}
+    .arch-overlay{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:14px;z-index:2}
+    .scene-title-chip{align-self:flex-start;background:rgba(0,0,0,.45);border:1px solid rgba(34,211,238,.4);border-radius:999px;padding:8px 14px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-cyan);font-family:var(--font-mono);backdrop-filter:blur(8px)}
+    .scene-controls{align-self:flex-end;display:flex;gap:8px;pointer-events:auto}
+    .scene-btn{border:1px solid var(--glass-border-hover);background:rgba(0,0,0,.45);color:var(--text-secondary);border-radius:10px;padding:8px 11px;font-size:.78rem;font-family:var(--font-mono);cursor:pointer;transition:all .25s var(--transition-smooth)}
+    .scene-btn:hover{border-color:rgba(34,211,238,.45);color:var(--accent-cyan);transform:translateY(-1px)}
+    .arch-side{border:1px solid var(--glass-border);border-radius:18px;background:rgba(0,0,0,.22);padding:14px;display:flex;flex-direction:column;gap:12px}
+    .detail-card{border:1px solid var(--glass-border);border-radius:12px;background:rgba(255,255,255,.02);padding:14px}
+    .detail-card h3{margin:0 0 8px;font-size:.95rem;color:var(--accent-glow)}
+    .detail-card p{margin:0;color:var(--text-secondary);line-height:1.5;font-size:.84rem}
+    .step-list{list-style:none;margin:8px 0 0;padding:0;max-height:320px;overflow:auto}
+    .step-list li{position:relative;padding:8px 10px 8px 22px;color:var(--text-secondary);border-left:2px solid rgba(148,163,184,.28);margin-bottom:6px;cursor:pointer;font-size:.8rem;transition:all .25s var(--transition-smooth);border-radius:6px}
+    .step-list li::before{content:'•';position:absolute;left:8px;color:var(--accent-cyan)}
+    .step-list li.active{border-left-color:rgba(34,211,238,.65);background:rgba(34,211,238,.08);color:#dbeafe}
+    .legend{display:grid;gap:8px;margin-top:8px}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-secondary);font-family:var(--font-mono)}
+    .legend-dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+    .dot-flow{background:#22d3ee}.dot-llm{background:#a78bfa}.dot-fallback{background:#fbbf24}.dot-output{background:#34d399}
+    .arch-status{border-top:1px solid var(--glass-border);padding-top:10px;font-size:.78rem;color:var(--text-muted);line-height:1.45;font-family:var(--font-mono)}
+    .nav-link-active{color:var(--accent-cyan)!important;border-bottom:2px solid rgba(34,211,238,.5)}
+    @media (max-width:1060px){.arch-layout{grid-template-columns:1fr}.arch-scene-wrap{min-height:620px}#archScene{min-height:620px}}
+    @media (max-width:720px){.container{margin-top:84px;padding:0 12px}.arch-scene-wrap{min-height:540px}#archScene{min-height:540px}.scene-controls{flex-wrap:wrap}}
   </style>
 </head>
-
 <body>
-  <div class="aurora-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
-
-  <nav class="navbar">
-    <a href="index.html" class="nav-brand">
-      <div class="nav-logo">PDF</div><div class="nav-title">PDF AI <span>Marvin Costa</span></div>
-    </a>
+  <div class="aurora-bg"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+  <div class="grid-overlay"></div>
+  <nav class="navbar navbar-pro">
+    <a href="index.html" class="nav-brand"><div class="nav-logo">PDF</div><div class="nav-title">PDF AI <span>Marvin Costa</span></div></a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link">App</a>
-      <a href="stacks.html" class="nav-link">Stacks</a>
+      <a href="index.html" class="nav-link">Início</a>
+      <a href="analise.html" class="nav-link">Relatório</a>
+      <a href="arquitetura.html" class="nav-link nav-link-active">Arquitetura</a>
+      <a href="stacks.html" class="nav-link stacks">Stacks <span class="link-arrow">→</span></a>
     </div>
   </nav>
-
   <div class="container">
-    <div class="glass-panel page-enter">
-      <header><h1>Arquitetura do Sistema</h1><div class="subtitle">Fluxo completo de processamento e interação entre componentes</div></header>
-
-      <div class="diagram-container">
-        <div class="flow-diagram">
-          <div class="flow-row"><div class="flow-node"><div class="node-icon">📄</div><div class="node-title">PDF Upload</div><div class="node-desc">Arquivo binário</div></div></div>
-          <div class="flow-arrow">⬇</div><div class="flow-label">POST /analyze</div>
-          <div class="flow-row"><div class="flow-node ingest"><div class="node-icon">📥</div><div class="node-title">PyMuPDF</div><div class="node-desc">Extração de texto + metadados</div></div></div>
-          <div class="flow-arrow">⬇</div><div class="flow-label">Texto puro + metadata</div>
-          <div class="flow-row"><div class="flow-node cognitive"><div class="node-icon">🎯</div><div class="node-title">Classificador</div><div class="node-desc">Scoring por keywords</div></div></div>
-          <div class="flow-arrow">⬇</div><div class="flow-label">Tipo + confiança</div>
-          <div class="flow-row"><div class="flow-node cognitive"><div class="node-icon">🧠</div><div class="node-title">Ollama + LLM</div><div class="node-desc">Prompt adaptativo por tipo</div></div></div>
-          <div class="flow-arrow">⬇</div><div class="flow-label">Análise semântica detalhada</div>
-          <div class="flow-row"><div class="flow-node"><div class="node-icon">🔄</div><div class="node-title">Fallback Regex</div><div class="node-desc">Complementa ou substitui IA</div></div></div>
-          <div class="flow-arrow">⬇</div><div class="flow-label">Merge: IA + Regex</div>
-          <div class="flow-row"><div class="flow-node output"><div class="node-icon">📤</div><div class="node-title">JSON Estruturado</div><div class="node-desc">Resumo + entidades + recomendações</div></div></div>
+    <div class="glass-panel">
+      <header>
+        <h1>Arquitetura 3D Interativa</h1>
+        <div class="subtitle">Fluxo do PDF em tempo real por todos os componentes da aplicação</div>
+      </header>
+      <section class="arch-intro">
+        <h2>Visão Geral</h2>
+        <p>Este diagrama 3D mostra o pipeline completo: ingestão do PDF, extração, classificação open-set, orquestração LLM local com Ollama/Qwen, fallback, merge e saída final com perfil hierárquico. O pacote PDF animado percorre continuamente todas as etapas.</p>
+      </section>
+      <div class="arch-layout">
+        <div class="arch-scene-wrap">
+          <canvas id="archScene"></canvas>
+          <div class="arch-overlay">
+            <span class="scene-title-chip">Pipeline 3D · PDF AI</span>
+            <div class="scene-controls">
+              <button id="toggleRotate" class="scene-btn" type="button">Pausar rotação</button>
+              <button id="toggleFlow" class="scene-btn" type="button">Pausar fluxo</button>
+              <button id="boostFlow" class="scene-btn" type="button">Fluxo 2x</button>
+            </div>
+          </div>
         </div>
+        <aside class="arch-side">
+          <section class="detail-card">
+            <h3>Etapa atual</h3>
+            <p id="stepTitle">Inicializando cena 3D...</p>
+            <ul class="step-list" id="stepList"></ul>
+          </section>
+          <section class="detail-card">
+            <h3>Legenda visual</h3>
+            <div class="legend">
+              <div class="legend-item"><span class="legend-dot dot-flow"></span> Fluxo principal do PDF</div>
+              <div class="legend-item"><span class="legend-dot dot-llm"></span> Ramo cognitivo (LLM local)</div>
+              <div class="legend-item"><span class="legend-dot dot-fallback"></span> Ramo fallback/robustez</div>
+              <div class="legend-item"><span class="legend-dot dot-output"></span> Saída de alto nível para UI/API</div>
+            </div>
+          </section>
+          <div class="arch-status">Arraste para orbitar, use scroll para zoom e clique em nós para fixar detalhes da etapa.</div>
+        </aside>
       </div>
-
-      <div class="sections">
-        <div class="section-card"><h3>📥 <span class="highlight">1. Ingestão (PyMuPDF)</span></h3><p>Leitura mecânica do PDF com extração de texto página por página e metadados (autor, título).</p><ul><li>Alta performance (biblioteca C)</li><li>Extração por página com contagem de chars</li><li>Metadados do PDF (autor, título, datas)</li></ul></div>
-        <div class="section-card"><h3>🎯 <span class="highlight">2. Classificação</span></h3><p>Algoritmo de scoring por keywords com 10 tipos de documento e 13+ keywords cada.</p><ul><li>Currículo, Extrato, Receita, Certificado</li><li>NF, Contrato, Laudo, Jurídico, Técnico</li><li>Score de confiança percentual</li></ul></div>
-        <div class="section-card"><h3>🧠 <span class="highlight">3. Motor Cognitivo</span></h3><p>LLM local via Ollama com prompts adaptativos que pedem resumo detalhado + entidades + recomendações.</p><ul><li>Contexto: 4096 tokens</li><li>Output: até 800 tokens</li><li>Prompt específico por tipo de documento</li><li>Timeout: 90s (CPU)</li></ul></div>
-        <div class="section-card"><h3>🔄 <span class="highlight">4. Fallback Inteligente</span></h3><p>Se a IA falhar, regex patterns extraem dados críticos: CPF, CNPJ, emails, telefones, valores monetários.</p><ul><li>Handlers específicos por tipo</li><li>Extração de entidades nomeadas</li><li>Sempre garante resposta</li></ul></div>
-        <div class="section-card"><h3>⚡ <span class="highlight">5. Backend Modular</span></h3><p>Flask com Blueprint, app factory, e módulos separados para cada responsabilidade.</p><ul><li>config.py → routes → services → utils</li><li>Gunicorn com 2 workers</li><li>Docker + docker-compose</li></ul></div>
-        <div class="section-card"><h3>🎨 <span class="highlight">6. Frontend Imersivo</span></h3><p>Interface glassmorphism com HUD dinâmico, barra de progresso e exportação JSON.</p><ul><li>CSS/JS modular e separado</li><li>3D Parallax + Page Transitions</li><li>Copiar/Exportar JSON</li></ul></div>
-      </div>
+      <footer class="site-footer">
+        <div class="footer-links">
+          <a href="https://linkedin.com/in/marvincost" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+          <a href="https://github.com/marvincoast" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
+        </div>
+        <div class="copyright">Marvin Costa · 2026</div>
+      </footer>
     </div>
   </div>
 
-  <script>
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        if (this.getAttribute('href').endsWith('.html')) {
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    document.querySelectorAll('.nav-link[href]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (href && href.endsWith('.html')) {
           e.preventDefault();
           document.body.classList.add('page-exit');
-          setTimeout(() => window.location.href = this.getAttribute('href'), 500);
+          setTimeout(() => { window.location.href = href; }, 500);
         }
       });
     });
+
+    const steps = [
+      { title: 'Upload + validação', detail: 'Frontend recebe PDF e envia para POST /analyze.' },
+      { title: 'API Flask', detail: 'Controla pipeline e telemetria por execução.' },
+      { title: 'PyMuPDF', detail: 'Extrai texto, metadados e sinal de densidade.' },
+      { title: 'Classificação open-set', detail: 'Infere tipo inicial sem forçar rótulo fraco.' },
+      { title: 'Orquestrador LLM', detail: 'Seleciona full/head-tail/chunked conforme tamanho.' },
+      { title: 'Ollama + Qwen', detail: 'Inferência local e saída em JSON estruturado.' },
+      { title: 'Fallback inteligente', detail: 'Regex por tipo garante robustez de extração.' },
+      { title: 'Merge + purpose', detail: 'Combina IA + fallback e preenche propósito ausente.' },
+      { title: 'document_profile', detail: 'Cria type/domain/subtype para muitos tipos de PDF.' },
+      { title: 'Relatório UI + API', detail: 'Entrega badges, grupos e warnings de qualidade.' }
+    ];
+
+    const stepList = document.getElementById('stepList');
+    const stepTitle = document.getElementById('stepTitle');
+    steps.forEach((s, idx) => {
+      const li = document.createElement('li');
+      li.textContent = `${idx + 1}. ${s.title}`;
+      li.dataset.idx = String(idx);
+      stepList.appendChild(li);
+    });
+
+    const canvas = document.getElementById('archScene');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030308, 0.022);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+    const camera = new THREE.PerspectiveCamera(56, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+    camera.position.set(0, 5.4, 12.2);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.045;
+    controls.maxDistance = 20;
+    controls.minDistance = 6;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.45;
+    controls.target.set(0, 0.8, 0);
+
+    scene.add(new THREE.AmbientLight(0xa6b8ff, 1.05));
+    const key = new THREE.PointLight(0x7c9bff, 2.2, 80, 2);
+    key.position.set(6, 8, 8);
+    scene.add(key);
+    const fill = new THREE.PointLight(0x22d3ee, 1.6, 64, 2);
+    fill.position.set(-9, 6, -6);
+    scene.add(fill);
+    const rim = new THREE.PointLight(0xf472b6, 1.2, 50, 2);
+    rim.position.set(0, 5, 10);
+    scene.add(rim);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(28, 20),
+      new THREE.MeshStandardMaterial({ color: 0x050716, transparent: true, opacity: 0.58, metalness: 0.2, roughness: 0.65 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.2;
+    scene.add(floor);
+
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 520;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      starPos[i * 3] = (Math.random() - 0.5) * 42;
+      starPos[i * 3 + 1] = Math.random() * 16;
+      starPos[i * 3 + 2] = (Math.random() - 0.5) * 42;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xb8c5ff, size: 0.07, transparent: true, opacity: 0.92 }));
+    scene.add(stars);
+
+    const nodePositions = [
+      new THREE.Vector3(-7.2, 1.6, 3.8), new THREE.Vector3(-4.9, 1.6, 2.0),
+      new THREE.Vector3(-2.4, 1.6, 0.5), new THREE.Vector3(0.0, 1.6, -1.2),
+      new THREE.Vector3(2.5, 1.6, -2.0), new THREE.Vector3(5.0, 1.6, -0.6),
+      new THREE.Vector3(2.7, 0.1, 1.6), new THREE.Vector3(0.1, 0.1, 2.8),
+      new THREE.Vector3(-2.8, 0.1, 3.4), new THREE.Vector3(-5.4, 0.1, 2.3),
+    ];
+
+    function makeLabelTexture(text) {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = 'rgba(2,6,23,0.78)'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = 'rgba(34,211,238,0.6)'; ctx.lineWidth = 3; ctx.strokeRect(4, 4, c.width - 8, c.height - 8);
+      ctx.fillStyle = '#e2e8f0'; ctx.font = '700 34px Inter'; ctx.fillText(text, 18, 74);
+      ctx.fillStyle = '#94a3b8'; ctx.font = '500 22px "JetBrains Mono"'; ctx.fillText('pipeline node', 18, 104);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const nodeMeshes = [];
+    const nodesGroup = new THREE.Group();
+    scene.add(nodesGroup);
+    const baseGeom = new THREE.BoxGeometry(1.7, 1.02, 1.7);
+
+    nodePositions.forEach((pos, idx) => {
+      const mat = new THREE.MeshStandardMaterial({
+        color: idx <= 3 ? 0x22d3ee : idx <= 6 ? 0xa78bfa : 0x34d399,
+        emissive: idx <= 3 ? 0x0b6070 : idx <= 6 ? 0x2a1a55 : 0x13422f,
+        emissiveIntensity: 0.62, metalness: 0.3, roughness: 0.28
+      });
+      const cube = new THREE.Mesh(baseGeom, mat);
+      cube.position.copy(pos);
+      cube.userData.stepIndex = idx;
+      nodesGroup.add(cube);
+
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeLabelTexture(steps[idx].title), transparent: true, opacity: 0.98 }));
+      sprite.scale.set(3.2, 0.78, 1);
+      sprite.position.set(pos.x, pos.y + 1.2, pos.z);
+      nodesGroup.add(sprite);
+      nodeMeshes.push(cube);
+    });
+
+    const links = [];
+    for (let i = 0; i < nodePositions.length - 1; i++) {
+      const g = new THREE.BufferGeometry().setFromPoints([nodePositions[i], nodePositions[i + 1]]);
+      const m = new THREE.LineDashedMaterial({ color: i <= 5 ? 0x8ea2ff : 0x5eead4, dashSize: 0.48, gapSize: 0.18, transparent: true, opacity: 0.9 });
+      const line = new THREE.Line(g, m);
+      line.computeLineDistances();
+      scene.add(line);
+      links.push(line);
+    }
+
+    function makePdfIconTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.fillStyle = 'rgba(255,255,255,0.98)';
+      ctx.fillRect(48, 24, 140, 208);
+      ctx.fillStyle = 'rgba(248,113,113,0.96)';
+      ctx.beginPath();
+      ctx.moveTo(188, 24);
+      ctx.lineTo(208, 44);
+      ctx.lineTo(188, 44);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(52, 150, 132, 56);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 34px Inter';
+      ctx.fillText('PDF', 82, 188);
+      ctx.strokeStyle = 'rgba(34,211,238,0.9)';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(42, 18, 170, 220);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const packet = new THREE.Group();
+    const pdfCard = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.98, 1.28),
+      new THREE.MeshStandardMaterial({
+        map: makePdfIconTexture(),
+        transparent: true,
+        alphaTest: 0.05,
+        emissive: 0x173f7a,
+        emissiveIntensity: 0.9,
+        side: THREE.DoubleSide
+      })
+    );
+    packet.add(pdfCard);
+    const halo = new THREE.Mesh(
+      new THREE.RingGeometry(0.72, 1.0, 44),
+      new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.28, side: THREE.DoubleSide })
+    );
+    halo.rotation.x = Math.PI / 2;
+    packet.add(halo);
+    scene.add(packet);
+
+    let flowPaused = false, rotatePaused = false, speedBoost = false, flowIdx = 0, flowProgress = 0, lockedStep = null;
+
+    function setStep(idx) {
+      const safe = Math.max(0, Math.min(steps.length - 1, idx));
+      const s = steps[safe];
+      stepTitle.textContent = `${safe + 1}. ${s.title} — ${s.detail}`;
+      [...stepList.children].forEach((li, i) => li.classList.toggle('active', i === safe));
+      nodeMeshes.forEach((n, i) => {
+        n.scale.setScalar(i === safe ? 1.22 : 1);
+        n.material.emissiveIntensity = i === safe ? 1.7 : 0.62;
+      });
+    }
+
+    function movePacket(delta) {
+      if (flowPaused) return;
+      flowProgress += delta * 0.42 * (speedBoost ? 2 : 1);
+      if (flowProgress > 1) { flowProgress = 0; flowIdx = (flowIdx + 1) % (nodePositions.length - 1); }
+      const a = nodePositions[flowIdx], b = nodePositions[flowIdx + 1];
+      packet.position.lerpVectors(a, b, flowProgress);
+      packet.position.y += Math.sin((performance.now() * 0.004) + flowIdx) * 0.05;
+      packet.rotation.y += delta * 1.6;
+      packet.rotation.z = Math.sin(performance.now() * 0.0022 + flowIdx) * 0.08;
+      halo.material.opacity = 0.2 + (Math.sin(performance.now() * 0.005) * 0.08 + 0.08);
+      if (lockedStep === null) setStep(flowIdx);
+    }
+
+    const ray = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    canvas.addEventListener('pointerdown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      ray.setFromCamera(pointer, camera);
+      const hit = ray.intersectObjects(nodeMeshes, false)[0];
+      if (hit) { lockedStep = hit.object.userData.stepIndex; setStep(lockedStep); }
+      else { lockedStep = null; }
+    });
+
+    stepList.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      if (!li) return;
+      const idx = Number(li.dataset.idx || 0);
+      lockedStep = idx; setStep(idx);
+      packet.position.copy(nodePositions[Math.min(idx, nodePositions.length - 1)]);
+      flowIdx = Math.min(idx, nodePositions.length - 2); flowProgress = 0;
+    });
+
+    document.getElementById('toggleRotate').addEventListener('click', (e) => {
+      rotatePaused = !rotatePaused; controls.autoRotate = !rotatePaused;
+      e.currentTarget.textContent = rotatePaused ? 'Retomar rotação' : 'Pausar rotação';
+    });
+    document.getElementById('toggleFlow').addEventListener('click', (e) => {
+      flowPaused = !flowPaused;
+      e.currentTarget.textContent = flowPaused ? 'Retomar fluxo' : 'Pausar fluxo';
+    });
+    document.getElementById('boostFlow').addEventListener('click', (e) => {
+      speedBoost = !speedBoost;
+      e.currentTarget.textContent = speedBoost ? 'Fluxo 1x' : 'Fluxo 2x';
+    });
+
+    function resize() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const clock = new THREE.Clock();
+    setStep(0);
+    packet.position.copy(nodePositions[0]);
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      movePacket(delta);
+      links.forEach((l) => { l.material.dashOffset -= delta * 0.55; });
+      stars.rotation.y += delta * 0.015;
+      nodesGroup.rotation.y += delta * 0.03;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
   </script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stacks Técnicas — PDF AI | Marvin Costa</title>
-  <meta name="description" content="Tecnologias utilizadas no PDF AI: Docker, Ollama, Flask, PyMuPDF e mais.">
+  <meta name="description" content="Tecnologias do PDF AI: Docker, Flask, PyMuPDF, LLM local compatível com OpenAI (Qwen).">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -48,7 +48,8 @@
       <div class="nav-logo">PDF</div><div class="nav-title">PDF AI <span>Marvin Costa</span></div>
     </a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link">App</a>
+      <a href="index.html" class="nav-link">Início</a>
+      <a href="analise.html" class="nav-link">Relatório</a>
       <a href="arquitetura.html" class="nav-link">Arquitetura</a>
     </div>
   </nav>
@@ -59,9 +60,9 @@
 
       <div class="grid">
         <div class="card"><div class="card-icon">🐳</div><h3>Docker</h3><p>Contêinerização completa. Garante isolamento, portabilidade e deploy consistente em qualquer ambiente.</p><div class="tags"><span class="tag">Containerization</span><span class="tag">DevOps</span></div></div>
-        <div class="card"><div class="card-icon">🧩</div><h3>Docker Compose</h3><p>Orquestração de múltiplos serviços (App + Ollama + Volumes). Deploy com um único comando.</p><div class="tags"><span class="tag">Orchestration</span><span class="tag">YAML</span></div></div>
-        <div class="card"><div class="card-icon">🧠</div><h3>Ollama</h3><p>Runtime local de inferência de LLMs. Roda modelos de IA diretamente na máquina, sem nuvem.</p><div class="tags"><span class="tag">Local AI</span><span class="tag">Inference Engine</span></div></div>
-        <div class="card"><div class="card-icon">📡</div><h3>Qwen 3.5 / Phi-3</h3><p>Modelos de linguagem otimizados para extração, classificação e sumarização de documentos.</p><div class="tags"><span class="tag">LLM</span><span class="tag">NLP</span><span class="tag">Quantized</span></div></div>
+        <div class="card"><div class="card-icon">🧩</div><h3>Docker Compose</h3><p>Orquestra o serviço da API e variáveis de ambiente; o LLM costuma rodar no host (LM Studio / llama.cpp).</p><div class="tags"><span class="tag">Orchestration</span><span class="tag">YAML</span></div></div>
+        <div class="card"><div class="card-icon">🧠</div><h3>LM Studio / llama.cpp</h3><p>Servidor HTTP compatível com OpenAI Chat Completions no host local — sem Ollama no pipeline.</p><div class="tags"><span class="tag">Local AI</span><span class="tag">OpenAI API</span></div></div>
+        <div class="card"><div class="card-icon">📡</div><h3>Qwen 2.5 (0.5B)</h3><p>Modelo leve em GGUF para JSON e sumarização; ideal para CPUs modestas com boa latência.</p><div class="tags"><span class="tag">LLM</span><span class="tag">NLP</span><span class="tag">Quantized</span></div></div>
         <div class="card"><div class="card-icon">🐍</div><h3>Python & Flask</h3><p>Backend leve com Flask + Blueprint + App Factory. Gunicorn em produção com 2 workers.</p><div class="tags"><span class="tag">Backend</span><span class="tag">REST API</span><span class="tag">Modular</span></div></div>
         <div class="card"><div class="card-icon">📄</div><h3>PyMuPDF (fitz)</h3><p>Camada de ingestão: extrai texto bruto e metadados do PDF com alta performance.</p><div class="tags"><span class="tag">Text Extraction</span><span class="tag">Input Pipeline</span></div></div>
         <div class="card"><div class="card-icon">🎨</div><h3>Frontend Moderno</h3><p>Interface imersiva com Glassmorphism, Parallax 3D, animações CSS puras e design responsivo.</p><div class="tags"><span class="tag">UI/UX</span><span class="tag">CSS3</span><span class="tag">Vanilla JS</span></div></div>

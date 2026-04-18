@@ -1,80 +1,55 @@
 # Deploy — PDF AI Service
 
-## Opção 1: Docker (Recomendado)
+## Opção 1: Docker (recomendado)
 
 ### Pré-requisitos
-- Docker e Docker Compose instalados
-- Ollama rodando no host (ou em container separado)
+
+- Docker e Docker Compose
+- No **host**, um servidor LLM com API **OpenAI-compatible** (ex.: LM Studio na porta 1234 com Qwen2.5-0.5B)
 
 ### Deploy
+
 ```bash
-# Clone e entre no diretório
 git clone https://github.com/marvincoast/pdf-service.git
 cd pdf-service
-
-# Build e start
-docker-compose up -d --build
-
-# Verificar
+docker compose up -d --build
 curl http://localhost:8080/health
 ```
 
-### Variáveis de Ambiente
-Edite `docker-compose.yml` ou crie um `.env`:
+### Variáveis de ambiente
+
+Use `docker-compose.yml` ou um ficheiro `.env` passado ao Compose. Principais:
+
 ```env
-OLLAMA_API=http://host.docker.internal:11434
-LLM_MODEL=phi3:mini
+LLM_API_BASE=http://host.docker.internal:1234/v1
+LLM_MODEL=qwen2.5-0.5b-instruct
+LLM_TIMEOUT=600
+LLM_JSON_MODE=1
 MAX_FILE_SIZE_MB=15
-MAX_TEXT_CHARS=4000
-OLLAMA_TIMEOUT=90
 ```
 
 ---
 
-## Opção 2: Local (Desenvolvimento)
+## Opção 2: Local (desenvolvimento)
 
 ```bash
-# Instale dependências
 pip install -r requirements.txt
-
-# Inicie o Ollama
-ollama serve &
-ollama pull phi3:mini
-
-# Rode a aplicação
+cp .env.example .env
+# Inicie LM Studio (ou llama.cpp server) com o modelo antes de:
 python app.py
 ```
 
 ---
 
-## Opção 3: Gunicorn (Produção)
+## Opção 3: Gunicorn (produção)
 
 ```bash
 pip install -r requirements.txt
-gunicorn --bind 0.0.0.0:8080 --workers 2 --threads 2 app:app
+gunicorn --bind 0.0.0.0:8080 --workers 2 --threads 2 --timeout 600 app:app
 ```
 
 ---
 
-## Frontend
+## Rede Docker ↔ host
 
-O frontend é estático e pode ser servido por qualquer servidor web:
-
-```bash
-# Exemplo com Python
-cd frontend/
-python -m http.server 3000
-```
-
-Ou servir via Nginx, Caddy, etc.
-
----
-
-## Ollama — Modelos Recomendados
-
-| Modelo | Tamanho | Velocidade | Qualidade |
-|---|---|---|---|
-| `phi3:mini` | 2.3GB | Rápido | Boa |
-| `qwen2.5:3b` | 2.0GB | Rápido | Boa |
-| `llama3.2:3b` | 2.0GB | Médio | Muito Boa |
-| `mistral:7b` | 4.1GB | Lento (CPU) | Excelente |
+O Compose define `extra_hosts: host.docker.internal:host-gateway` e `LLM_API_BASE` apontando para o host, para o container alcançar o LM Studio (ou outro) na máquina física.

@@ -1,0 +1,19 @@
+[2026-04-17 03:45:37 +0000] [1] [INFO] Starting gunicorn 21.2.0
+[2026-04-17 03:45:37 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2026-04-17 03:45:37 +0000] [1] [INFO] Using worker: gthread
+[2026-04-17 03:45:37 +0000] [7] [INFO] Booting worker with pid: 7
+[2026-04-17 03:45:37 +0000] [8] [INFO] Booting worker with pid: 8
+{"timestamp":"2026-04-17 03:45:49,866","level":"INFO","service":"pdf-service","message":"📄 Extraído: 3586 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:45:49,866","level":"INFO","service":"pdf-service","message":"📄 PDF: Marvin_Costa_Curriculo.pdf | 3586 chars | 2 páginas"}
+{"timestamp":"2026-04-17 03:45:49,868","level":"INFO","service":"pdf-service","message":"📊 Scores: {"resume": 5, "medical_report": 1, "invoice": 1, "educational_certificate": 4, "technical_report": 1}"}
+{"timestamp":"2026-04-17 03:45:49,868","level":"INFO","service":"pdf-service","message":"🎯 Classificado: resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:45:49,868","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Currículo/Resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 03:45:49,868","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=3586"}
+[2026-04-17 03:48:15 +0000] [1] [CRITICAL] WORKER TIMEOUT (pid:8)
+[2026-04-17 03:49:27 +0000] [8] [INFO] Worker exiting (pid: 8)
+{"timestamp":"2026-04-17 03:49:27,460","level":"WARNING","service":"pdf-service","message":"⚠️ IA falhou (ConnectionError): ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"}
+{"timestamp":"2026-04-17 03:49:27,471","level":"INFO","service":"pdf-service","message":"🔄 Executando fallback inteligente para tipo: resume"}
+{"timestamp":"2026-04-17 03:49:27,534","level":"INFO","service":"pdf-service","message":"🎯 Fallback concluído: 10 campos extraídos"}
+[2026-04-17 03:49:28 +0000] [1] [ERROR] Worker (pid:8) exited with code 1
+[2026-04-17 03:49:28 +0000] [1] [ERROR] Worker (pid:8) exited with code 1.
+[2026-04-17 03:49:28 +0000] [12] [INFO] Booting worker with pid: 12

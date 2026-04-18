@@ -24,6 +24,16 @@ def test_health(client):
     assert "version" in data
 
 
+def test_health_llm(client):
+    """GET /health/llm devolve JSON com estado do probe (sempre 200)."""
+    res = client.get("/health/llm")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "reachable" in data
+    assert "probe_url" in data
+    assert "configured_model" in data
+
+
 def test_analyze_no_file(client):
     """Testa /analyze sem enviar arquivo."""
     res = client.post("/analyze")

@@ -1,0 +1,14 @@
+[2026-04-17 03:36:33 +0000] [1] [INFO] Starting gunicorn 21.2.0
+[2026-04-17 03:36:33 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2026-04-17 03:36:33 +0000] [1] [INFO] Using worker: gthread
+[2026-04-17 03:36:33 +0000] [7] [INFO] Booting worker with pid: 7
+[2026-04-17 03:36:33 +0000] [8] [INFO] Booting worker with pid: 8
+{"timestamp":"2026-04-17 03:37:17,555","level":"INFO","service":"pdf-service","message":"📄 Extraído: 11003 chars | 8 páginas"}
+{"timestamp":"2026-04-17 03:37:17,556","level":"INFO","service":"pdf-service","message":"📄 PDF: 14923097701-IRPF-A-2025-2024-DEC.pdf | 11003 chars | 8 páginas"}
+{"timestamp":"2026-04-17 03:37:17,567","level":"INFO","service":"pdf-service","message":"📊 Scores: {"medical_report": 1, "bank_statement": 7, "invoice": 4, "technical_report": 1}"}
+{"timestamp":"2026-04-17 03:37:17,568","level":"INFO","service":"pdf-service","message":"🎯 Classificado: bank_statement (confiança: 53%)"}
+{"timestamp":"2026-04-17 03:37:17,568","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Extrato Bancário (confiança: 53%)"}
+{"timestamp":"2026-04-17 03:37:17,569","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=11003"}
+{"timestamp":"2026-04-17 03:37:19,453","level":"WARNING","service":"pdf-service","message":"⚠️ IA falhou (HTTPError): 500 Server Error: Internal Server Error for url: http://127.0.0.1:11434/api/generate"}
+{"timestamp":"2026-04-17 03:37:19,453","level":"INFO","service":"pdf-service","message":"🔄 Executando fallback inteligente para tipo: bank_statement"}
+{"timestamp":"2026-04-17 03:37:19,456","level":"INFO","service":"pdf-service","message":"🎯 Fallback concluído: 10 campos extraídos"}

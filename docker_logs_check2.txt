@@ -1,0 +1,11 @@
+[2026-04-17 04:02:46 +0000] [1] [INFO] Starting gunicorn 21.2.0
+[2026-04-17 04:02:46 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2026-04-17 04:02:46 +0000] [1] [INFO] Using worker: gthread
+[2026-04-17 04:02:46 +0000] [8] [INFO] Booting worker with pid: 8
+[2026-04-17 04:02:46 +0000] [9] [INFO] Booting worker with pid: 9
+{"timestamp":"2026-04-17 04:03:40,128","level":"INFO","service":"pdf-service","message":"📄 Extraído: 4458 chars | 2 páginas"}
+{"timestamp":"2026-04-17 04:03:40,128","level":"INFO","service":"pdf-service","message":"📄 PDF: MARVIN COSTA.pdf | 4458 chars | 2 páginas"}
+{"timestamp":"2026-04-17 04:03:40,129","level":"INFO","service":"pdf-service","message":"📊 Scores: {"resume": 5, "medical_report": 1, "invoice": 1, "educational_certificate": 4, "technical_report": 1}"}
+{"timestamp":"2026-04-17 04:03:40,130","level":"INFO","service":"pdf-service","message":"🎯 Classificado: resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 04:03:40,130","level":"INFO","service":"pdf-service","message":"🎯 Tipo: Currículo/Resume (confiança: 38%)"}
+{"timestamp":"2026-04-17 04:03:40,130","level":"INFO","service":"pdf-service","message":"🤖 Preparando análise single_shot [full_document], len=4458"}
